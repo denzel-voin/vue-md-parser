@@ -4,7 +4,7 @@
   "description": "Парсер для Vue, собирающий MD-файлы",
   "main": "index.js",
   "bin": {
-    "vue-md-parser": "./bin/cli.js"
+    "vue-md-parser": "node generateDocs.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
