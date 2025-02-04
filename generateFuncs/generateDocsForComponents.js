@@ -5,6 +5,7 @@ import { extractDescription } from "./extractCode/extractDescription.js";
 // Пути к папкам
 const docsComponentsDir = path.join(process.cwd(), 'docs', 'src');
 const configPath = path.join(process.cwd(), 'docs', '.vitepress', 'config.mjs');
+const guidesDir = path.join(process.cwd(), 'docs', 'guides');
 
 // Функция для рекурсивного поиска файлов .vue и .js
 export function findComponents(dir, basePath = '') {
@@ -47,35 +48,15 @@ export function generateDocFile(filePath, name, relativePath) {
   }
 
   const importPath = relativePath.replace(/\.(vue|js)$/, '');
-  let docContent = `# ${name}
-
-${description}
-
-`;
+  let docContent = `# ${name}\n\n${description}\n\n`;
 
   if (filePath.endsWith('.vue')) {
-    docContent += `## Пример использования
-
-\`\`\`vue
-import ${name} from '@/components/${importPath}';
-\`\`\`
-
-\`\`\`vue
-  <${name} />
-\`\`\`
-
-`;
+    docContent += `## Пример использования\n\n\`\`\`vue\nimport ${name} from '@/components/${importPath}';\n\`\`\`\n\n\`\`\`vue\n  <${name} />\n\`\`\`\n\n`;
   } else if (filePath.endsWith('.js')) {
-    docContent += `\`\`\`js
-import * as ${name} from '@/components/${importPath}';
-\`\`\`
-
-`;
+    docContent += `\`\`\`js\nimport * as ${name} from '@/components/${importPath}';\n\`\`\`\n\n`;
   }
 
-  docContent += `---
-> Документация сгенерирована автоматически.
-`;
+  docContent += `---\n> Документация сгенерирована автоматически.\n`;
 
   fs.writeFileSync(docFilePath, docContent);
   console.log(`📘 Документация для ${name} сгенерирована.`);
@@ -83,32 +64,275 @@ import * as ${name} from '@/components/${importPath}';
 
 // Функция обновления config.mjs
 export function updateConfig(items) {
-  const configTemplate = `import { defineConfig } from 'vitepress';
-
-export default defineConfig({
-  themeConfig: {
-    search: {
-      provider: 'local'
-    },
-    sidebar: [
-      {
-        text: 'Структура',
-        collapsed: false,
-        items: ${JSON.stringify(items, null, 2)}
-      },
-      {
-        text: 'Гайды',
-        collapsed: true,
-        items: [
-          { text: 'Как установить', link: '/guides/install' },
-          { text: 'Как использовать', link: '/guides/usage' },
-        ]
-      }
-    ]
-  }
-});
-`;
+  const configTemplate = `import { defineConfig } from 'vitepress';\n\nexport default defineConfig({\n  themeConfig: {\n    search: {\n      provider: 'local'\n    },\n    sidebar: [\n      {\n        text: 'Структура',\n        collapsed: false,\n        items: ${JSON.stringify(items, null, 2)}\n      },\n      {\n        text: 'Гайды',\n        collapsed: true,\n        items: [\n          { text: 'Как установить', link: '/guides/install' },\n          { text: 'Как использовать', link: '/guides/usage' }\n        ]\n      }\n    ]\n  }\n});\n`;
 
   fs.writeFileSync(configPath, configTemplate);
   console.log('✅ Sidebar в config.mjs обновлён!');
 }
+
+// Создание папки guides и файлов install.md, usage.md
+export function createGuides() {
+  if (!fs.existsSync(guidesDir)) {
+    fs.mkdirSync(guidesDir, { recursive: true });
+  }
+
+  const installContent = `
+  # Установка документации
+
+## Установка VitePress
+
+Для начала необходимо установить VitePress:
+
+\`\`\`bash
+npm add -D vitepress
+\`\`\`
+
+## Инициализируем проект:
+
+\`\`\`bash
+npx vitepress init
+\`\`\`
+
+#### Во время инициализации вам будет предложено выбрать конфигурацию:
+
+\`\`\`wbnet
+┌  Welcome to VitePress!
+│
+◇  Where should VitePress initialize the config?
+│  ./docs
+│
+◇  Site title:
+│  Наименование проекта
+│
+◇  Site description:
+│  Описание проекта
+│
+◆  Theme:
+│  ● Default Theme (Out of the box, good-looking docs)
+│  ○ Default Theme + Customization
+│  ○ Custom Theme
+└
+\`\`\`
+
+## Установка vue-md-parser
+
+#### Далее необходимо установить vue-md-parser:
+
+\`\`\`bash
+npm install -g vue-md-parser
+\`\`\`
+
+## Настройка скриптов
+
+#### Откройте package.json и измените скрипт для разработки документации:
+
+\`\`\`json
+"scripts": {
+"docs:dev": "vue-md-parser && vitepress dev docs"
+}
+\`\`\`
+
+## Запуск сервера
+
+\`\`\`bash
+npm run docs:dev
+\`\`\`
+
+## Сервер будет доступен на http://localhost:5173/
+  `;
+
+  const usageContent = `
+# Использование документации
+
+## Добавление комментариев для генерации документации
+
+### Название компонента
+
+Название компонента должно быть указано первым комментарием в теге \`<template>\`:
+
+\`\`\`html
+<!-- Название -->
+\`\`\`
+
+## Порядок структуры \`<script>\`
+
+1. props
+2. Переменные
+3. Обычные функции
+4. Стрелочные функции
+5. computed
+6. watch
+
+## Props
+
+\`\`\`js
+props: {
+    LikeDialog: {
+      type: Boolean,
+      default: false
+    }
+}
+\`\`\`
+
+> Пропсы не нужно дополнительно комментировать, главное сохранять поля type и default.
+
+## Переменные
+
+Комментарии к переменным пишутся в формате JSDoc, с обязательной точкой в конце.
+
+Пример:
+
+\`\`\`js
+/**
+ * Получаем объект alert из хранилища alert с использованием store для уведомлений.
+ */
+const feedalert = useAlertStore().alert;
+\`\`\`
+
+Шаблон:
+
+\`\`\`js
+/**
+ * .
+ */
+\`\`\`
+
+## Функции
+
+Комментарии к обычным функциям оформляются в формате JSDoc с ключевым словом \`@function\`. После \`@function\` должно идти одно из трех ключевых слов: \`Инициализирует\`, \`Управляет\`, \`Выполняет\`.
+
+Пример:
+
+\`\`\`js
+/**
+ * @function Выполняет загрузку данных обратной связи с сервера.
+ */
+function f_feedbackdata() {
+    axiosApiInstance.get('api/feedback/feedbackdata/')
+        .then(data => {
+            feedbackdata.value = data.data;
+            // Если оценки отсутствуют, инициализируем их
+            if (feedbackdata.value.nowrating.length === 0) {
+                for (let x of feedbackdata.value.basecrit) {
+                    feedbackdata.value.nowrating.push({ rating: x.rating, crit: x.id, id: null });
+                }
+            }
+            // Если комментарий отсутствует, создаем пустой объект
+            if (feedbackdata.value.nowcomment === null) {
+                feedbackdata.value.nowcomment = { comment: '', id: null };
+            }
+        });
+}
+\`\`\`
+
+Шаблон:
+
+\`\`\`js
+/**
+ * @function Инициализирует Управляет Выполняет.
+ */
+\`\`\`
+
+## Стрелочные функции
+
+Комментарии к стрелочным функциям оформляются с ключевым словом \`@arrowFunc\`. Следующая строка должна начинаться с одного из трех слов: \`Фильтрует\`, \`Преобразует\`, \`Обрабатывает\`.
+
+Пример:
+
+\`\`\`js
+/**
+ * @arrowFunc
+ * Обрабатывает данные для карусели с сервера.
+ */
+const getfromserver = () => {
+        axiosApiInstance.get("api/navigation/carousels/").then((result) => {
+            // Проверяем наличие сообщения об ошибке
+            if (result.data.mess !== "") {
+                feedalert.alert = true;
+                feedalert.text = result.data.mess;
+                feedalert.color = "red-darken-2";
+                feedalert.ico = "mdi-alert-outline";
+            }
+
+            // Если сервер вернул данные, обновляем массив карусели
+            if (result.data.result.length > 0) {
+                carous.value = result.data.result;
+            }
+        });
+    };
+\`\`\`
+
+Шаблон:
+
+\`\`\`js
+/**
+ * @arrowFunc
+ * Фильтрует Преобразует Обрабатывает.
+ */
+\`\`\`
+
+## Computed
+
+Комментарии к computed свойствам оформляются с ключевым словом \`@computed\`. Комментарий должен начинаться с одного из трех слов: \`Выводит\`, \`Определяет\`, \`Подсчитывает\`.
+
+Пример:
+
+\`\`\`js
+/**
+ * @computed Подсчитывает средний рейтинг на основе оценок пользователя.
+ */
+const average = computed(() => {
+        const sum = feedbackdata.value.nowrating.reduce((total, obj) => total + obj.rating, 0);
+        const sumlen = sum / feedbackdata.value.nowrating.length;
+        return Number.isInteger(sumlen) ? sumlen : sumlen.toFixed(1);
+    });
+\`\`\`
+
+Шаблон:
+
+\`\`\`js
+/**
+ * @computed Выводит Определяет Подсчитывает.
+ */
+\`\`\`
+
+## Watch
+
+Комментарии к watch оформляются с ключевым словом \`@watch\`. Комментарий должен начинаться с одного из трех слов: \`Отслеживает\`, \`Реагирует\`, \`Синхронизирует\`.
+
+Пример:
+
+\`\`\`js
+/**
+ * @watch
+ * Получает данные для карусели с сервера.
+ */
+watch(
+    () => indximg,
+    (newValue, oldValue) => {
+        if (newValue) {
+            galleryimges.value = newsFull.value.gallery[newValue.value];
+        }
+    },
+    { deep: true }
+);
+\`\`\`
+
+Шаблон:
+
+\`\`\`js
+/**
+ * @watch
+ * Отслеживает Реагирует Синхронизирует.
+ */
+\`\`\`
+`;
+
+  fs.writeFileSync(path.join(guidesDir, 'install.md'), installContent);
+  fs.writeFileSync(path.join(guidesDir, 'usage.md'), usageContent);
+
+  console.log('📘 Файлы install.md и usage.md созданы в папке guides.');
+}
+
+// Запуск создания файлов
+createGuides();

@@ -3,7 +3,7 @@ import { extractFunctionBody } from "../extractCode/extractFunctionBody.js";
 export const descriptionFunctions = (description, scriptContent) => {
   // Задаём ключевые слова, по которым будем определять описание функции.
   // В данном примере описание должно содержать одно из этих слов.
-  const keywords = ["Загружает", "Генерирует", "Закрывает", "Отправляет", "Устанавливает", "Рассчитывает"];
+  const keywords= ["Инициализирует", "Управляет", "Выполняет"];
 
   // Ищем объявления функций через ключевое слово "function"
   const functionDocs = [

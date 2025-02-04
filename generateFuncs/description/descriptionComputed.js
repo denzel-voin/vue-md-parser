@@ -2,7 +2,7 @@ import { extractComputedBody } from "../extractCode/extractComputedBody.js";
 
 export const descriptionComputed = (description, scriptContent) => {
   // Ключевые слова для извлечения описания computed-свойств
-  const keywords = ["Рассчитывает", "Вычисляет", "Определяет", "Обрабатывает"];
+  const keywords= ["Выводит", "Определяет", "Подсчитывает"];
 
   const computedDocs = [
     ...scriptContent.matchAll(

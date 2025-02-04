@@ -1,6 +1,6 @@
 export const descriptionWatch = (description, scriptContent) => {
   // Задаём ключевые слова для описания watch-блоков.
-  const keywords = ["Получает", "Загружает", "Следит", "Обновляет"];
+  const keywords = ["Отслеживает", "Реагирует", "Синхронизирует"];
 
   const watchDocs = [
     ...scriptContent.matchAll(

@@ -2,7 +2,7 @@ import { extractArrowFunctionBody } from "../extractCode/extractArrowFunctionBod
 
 export const descriptionArrowFunctions = (description, scriptContent) => {
   // Задаём ключевые слова для описания стрелочных функций.
-  const keywords = ["Открывает", "Обрабатывает", "Расчитывает", "Закрывает", "Получает"];
+  const keywords= ["Фильтрует", "Преобразует", "Обрабатывает"];
 
   const arrowFunctionDocs = [
     ...scriptContent.matchAll(
