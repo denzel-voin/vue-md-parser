@@ -383,18 +383,3 @@ const detailRound = (pos, name) => {
 
   console.log('📘 Файлы install.md и usage.md созданы в папке guides.');
 }
-
-// Запуск создания файлов
-createGuides();
-
-
-const source = path.resolve(__dirname, '../README.md');
-const target = path.resolve(__dirname, './docs/README.md');
-
-if (fs.existsSync(source)) {
-  fs.copyFileSync(source, target);
-  console.log('✅ README.md успешно скопирован!');
-} else {
-  fs.writeFileSync(target, '# Документация\n\n⚠️ Оригинальный README.md не найден.');
-  console.log('⚠️ Исходный README.md не найден, создан пустой файл.');
-}
