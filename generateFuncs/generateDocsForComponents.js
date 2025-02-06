@@ -64,7 +64,7 @@ export function generateDocFile(filePath, name, relativePath) {
 
 // Функция обновления config.mjs
 export function updateConfig(items) {
-  const configTemplate = `import { withMermaid } from 'vitepress-plugin-mermaid';\n\nexport default withMermaid({\n  themeConfig: {\n    search: {\n      provider: 'local'\n    },\n    sidebar: [\n      {\n        text: 'Структура',\n        collapsed: false,\n        items: ${JSON.stringify(items, null, 2)}\n      },\n      {\n        text: 'Гайды',\n        collapsed: true,\n        items: [\n          { text: 'Как установить', link: '/guides/install' },\n          { text: 'Как использовать', link: '/guides/usage' }\n        ]\n      }\n    ]\n  },\nmermaid: {
+  const configTemplate = `import { withMermaid } from 'vitepress-plugin-mermaid';\n\nexport default withMermaid({\n  themeConfig: {\n    search: {\n      provider: 'local'\n    },\n    sidebar: [\n      {\n        text: 'Структура',\n        collapsed: false,\n        items: ${JSON.stringify(items, null, 2)}\n      },\n      {\n        text: 'Гайды',\n        collapsed: true,\n        items: [\n          { text: 'Как установить', link: '/guides/install' },\n          { text: 'Как использовать', link: '/guides/usage' },\n          { text: 'Правила комитов', link: '/guides/commits' }\n        ]\n      }\n    ]\n  },\nmermaid: {
     // refer https://mermaid.js.org/config/setup/modules/mermaidAPI.html#mermaidapi-configuration-defaults for options
   },
   // optionally set additional config for plugin itself with MermaidPluginConfig
@@ -157,7 +157,7 @@ npm run docs:dev
 Описание компонента должно быть указано первым комментарием в теге \`<template>\`:
 
 \`\`\`html
-<!-- Название -->
+<!-- Описание -->
 \`\`\`
 
 ## Порядок структуры \`<script>\`
@@ -175,12 +175,13 @@ npm run docs:dev
 props: {
     LikeDialog: {
       type: Boolean,
-      default: false
+      default: false,
+      comment: 'Модалка лайка'
     }
 }
 \`\`\`
 
-> Пропсы не нужно дополнительно комментировать, главное сохранять поля type и default.
+> Поля default и comment являются опциональными. Commnet записывается в одиночные ковычки.
 
 ## Переменные
 
@@ -384,6 +385,29 @@ const detailRound = (pos, name) => {
 \`\`\`
 `;
 
+  const commitContent =`
+  ## Заголовок должен содержать тип, номер задачи и название коммита. 
+  Формат: <тип> [<номер задачи>]: <название>
+  
+  | Название | Описание |
+  |----------|----------| 
+  | \`feat\` | Новый функционал |
+  | \`fix\` | Исправление ошибки |
+  | \`docs\` | Изменения в документации |
+  | \`style\` | Изменения, не влияющие на функциональность |
+  | \`refactor\` | Изменения кода, не исправляющие ошибки и не добавляющие функционал |
+  | \`perf\` | Изменения, улучшающие производительность |
+  | \`test\` | Добавление тестов |
+  | \`chore\` | Изменения в процессе сборки или вспомогательных инструментах. |
+  
+   Пример:
+
+\`\`\`bash
+feat [X-01]: я тут накоммитил
+\`\`\`
+  `
+
+  fs.writeFileSync(path.join(guidesDir, 'commits.md'), commitContent);
   fs.writeFileSync(path.join(guidesDir, 'install.md'), installContent);
   fs.writeFileSync(path.join(guidesDir, 'usage.md'), usageContent);
 
