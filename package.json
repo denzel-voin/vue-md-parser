@@ -1,6 +1,6 @@
 {
   "name": "vue-md-parser",
-  "version": "1.0.4",
+  "version": "1.0.14",
   "description": "Парсер для Vue, собирающий MD-файлы",
   "main": "index.js",
   "bin": {
@@ -16,5 +16,7 @@
   "keywords": ["vue", "parser", "markdown", "md"],
   "author": "Ваше Имя",
   "license": "MIT",
-  "dependencies": {}
+  "dependencies": {
+    "vitepress-plugin-mermaid": "^2.0.17"
+  }
 }

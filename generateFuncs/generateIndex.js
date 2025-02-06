@@ -1,6 +1,7 @@
 import fs from 'fs';
 
-const content = `---
+export const generateIndex = (indexFile) => {
+    const content = `---
 # https://vitepress.dev/reference/default-theme-home-page
 layout: home
 
@@ -22,8 +23,6 @@ features:
 ---
 
 `;
-
-export const generateIndex = (indexFile, content) => {
     fs.writeFileSync(indexFile, content);
     console.log('✅ index.md успешно создан/обновлён!');
 }

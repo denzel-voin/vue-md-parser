@@ -64,7 +64,13 @@ export function generateDocFile(filePath, name, relativePath) {
 
 // Функция обновления config.mjs
 export function updateConfig(items) {
-  const configTemplate = `import { defineConfig } from 'vitepress';\n\nexport default defineConfig({\n  themeConfig: {\n    search: {\n      provider: 'local'\n    },\n    sidebar: [\n      {\n        text: 'Структура',\n        collapsed: false,\n        items: ${JSON.stringify(items, null, 2)}\n      },\n      {\n        text: 'Гайды',\n        collapsed: true,\n        items: [\n          { text: 'Как установить', link: '/guides/install' },\n          { text: 'Как использовать', link: '/guides/usage' }\n        ]\n      }\n    ]\n  }\n});\n`;
+  const configTemplate = `import { withMermaid } from 'vitepress-plugin-mermaid';\n\nexport default withMermaid({\n  themeConfig: {\n    search: {\n      provider: 'local'\n    },\n    sidebar: [\n      {\n        text: 'Структура',\n        collapsed: false,\n        items: ${JSON.stringify(items, null, 2)}\n      },\n      {\n        text: 'Гайды',\n        collapsed: true,\n        items: [\n          { text: 'Как установить', link: '/guides/install' },\n          { text: 'Как использовать', link: '/guides/usage' }\n        ]\n      }\n    ]\n  },\nmermaid: {
+    // refer https://mermaid.js.org/config/setup/modules/mermaidAPI.html#mermaidapi-configuration-defaults for options
+  },
+  // optionally set additional config for plugin itself with MermaidPluginConfig
+  mermaidPlugin: {
+    class: 'mermaid my-class', // set additional css classes for parent container
+  },});\n`;
 
   fs.writeFileSync(configPath, configTemplate);
   console.log('✅ Sidebar в config.mjs обновлён!');
@@ -358,7 +364,7 @@ const detailRound = (pos, name) => {
     idpos.value=pos
     namepos.value=name
     dialogDetailRound.value=!dialogDetailRound.value
-    axiosApiInstance.get(\`api/general_vacation/dailyload/?id=${pos}\`).then(data => {
+    axiosApiInstance.get(\api/general_vacation/dailyload/?id=pos\).then(data => {
       t_dailyRound.value = data.data
 
       result.value=JSON.parse(JSON.stringify(data.data.daily))
