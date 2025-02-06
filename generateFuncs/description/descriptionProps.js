@@ -1,6 +1,4 @@
 export const descriptionProps = (description, scriptContent) => {
-
-  // Находим блок props с учётом вложенности {}
   const propsStart = scriptContent.indexOf("props:");
   if (propsStart === -1) return description; // Если нет props, выходим
 
@@ -24,21 +22,22 @@ export const descriptionProps = (description, scriptContent) => {
 
   // Парсим пропсы
   description += `## Описание пропсов\n\n`;
-  description += `| Пропс | Тип | Значение по умолчанию |\n`;
-  description += `|-------|-----|-----------------------|\n`;
+  description += `| Пропс | Тип | Значение по умолчанию | Комментарий |\n`;
+  description += `|-------|-----|-----------------------|-------------|\n`;
 
-  // Новая регулярка: поддерживает многострочные props и вложенность
+  // Регулярка для поиска пропсов с комментариями
   const propMatches = [...propsContent.matchAll(
-      /(\w+)\s*:\s*{\s*type:\s*([\w]+)(?:[^}]*?default:\s*([^,}\n]+))?/g
+      /(\w+)\s*:\s*{\s*type:\s*([\w]+)(?:[^}]*?default:\s*([^,}\n]+))?(?:[^}]*?comment:\s*'([^']+)')?/g
   )];
 
   propMatches.forEach((propMatch) => {
     const propName = propMatch[1];
     const propType = propMatch[2];
     const propDefaultValue = propMatch[3] ? propMatch[3].trim() : 'нет данных';
+    const propComment = propMatch[4] ? propMatch[4].trim() : 'нет комментария'; // Если комментарий есть
 
-
-    description += `| \`${propName}\` | \`${propType}\` | \`${propDefaultValue}\` |\n`;
+    // Добавляем информацию о пропсе в таблицу
+    description += `| \`${propName}\` | \`${propType}\` | \`${propDefaultValue}\` | ${propComment} |\n`;
   });
 
   return description;
