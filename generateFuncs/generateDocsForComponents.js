@@ -326,6 +326,56 @@ watch(
  * Отслеживает Реагирует Синхронизирует.
  */
 \`\`\`
+
+## Аргументы
+
+Комментарии к аргументам оформляются с ключевым словом \`@param\`.
+
+Пример:
+
+\`\`\`js
+/**
+ * @arrowFunc
+ * Фильтрует Преобразует Обрабатывает.
+ * @param {number} idus ID пользователя.
+ */
+const getcard = async (idus) => {
+    menuGetUserDialog.value = true
+    iduser.value = idus
+  }
+\`\`\`
+
+Если аргументов несколько, то каждый пишется с новой строчки:
+
+\`\`\`js
+/**
+ * @arrowFunc
+ * Фильтрует Преобразует Обрабатывает.
+ * @param {number} pos Позиция.
+ * @param {string} name Название раунда.
+ */
+const detailRound = (pos, name) => {
+    idpos.value=pos
+    namepos.value=name
+    dialogDetailRound.value=!dialogDetailRound.value
+    axiosApiInstance.get(\`api/general_vacation/dailyload/?id=${pos}\`).then(data => {
+      t_dailyRound.value = data.data
+
+      result.value=JSON.parse(JSON.stringify(data.data.daily))
+
+    })
+  }
+\`\`\`
+
+Шаблон:
+
+\`\`\`js
+/**
+ * @arrowFunc
+ * Фильтрует Преобразует Обрабатывает.
+ * @param {} .
+ */
+\`\`\`
 `;
 
   fs.writeFileSync(path.join(guidesDir, 'install.md'), installContent);
@@ -336,3 +386,15 @@ watch(
 
 // Запуск создания файлов
 createGuides();
+
+
+const source = path.resolve(__dirname, '../README.md');
+const target = path.resolve(__dirname, './docs/README.md');
+
+if (fs.existsSync(source)) {
+  fs.copyFileSync(source, target);
+  console.log('✅ README.md успешно скопирован!');
+} else {
+  fs.writeFileSync(target, '# Документация\n\n⚠️ Оригинальный README.md не найден.');
+  console.log('⚠️ Исходный README.md не найден, создан пустой файл.');
+}
