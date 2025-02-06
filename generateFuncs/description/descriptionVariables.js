@@ -1,9 +1,9 @@
-import {wrapText} from "../utils/wrapText.js";
+import { wrapText } from "../utils/wrapText.js";
 
 export const descriptionVariables = (description, scriptContent) => {
   const variableDocs = [
     ...scriptContent.matchAll(
-      /\/\*\*([\s\S]*?)\*\/\s*\n\s*(const|let|var)\s+([\w\d_]+)\s*=\s*(?!\s*(?:async\s*)?(?:\([^)]*\)|[A-Za-z_$][\w$]*)\s*=>|\s*computed\s*\()\s*([^;]+)(?=\s*;)/g
+        /\/\*\*([\s\S]*?)\*\/\s*\n\s*(const|let|var)\s+([\w\d_]+)\s*=\s*(?!\s*(?:async\s*)?(?:\([^)]*\)|[A-Za-z_$][\w$]*)\s*=>|\s*computed\s*\()\s*([^;]+)(?=\s*;)/g
     ),
   ];
 
@@ -15,17 +15,35 @@ export const descriptionVariables = (description, scriptContent) => {
 
   variableDocs.forEach(match => {
     const variableName = match[3]; // Имя переменной
-    const variableValue = match[4].trim(); // Значение переменной
+    let variableValue = match[4].trim(); // Значение переменной
 
+    // Проверяем, если значение переменной - это объект или массив
+    if (variableValue.startsWith('[') || variableValue.startsWith('{')) {
+      // Используем JSON.stringify для объектов и массивов
+      try {
+        // Преобразуем объект/массив в строку с отступами
+        variableValue = JSON.stringify(eval(variableValue), null, 2)
+            .replace(/\n/g, ' ') // Убираем переносы строк внутри данных
+            .replace(/ {2,}/g, ' ') // Заменяем множественные пробелы на один
+            .trim();
+      } catch (e) {
+        // В случае ошибки просто оставляем исходное значение
+        console.error('Ошибка при обработке переменной:', variableName, e);
+      }
+    }
+
+    // Форматируем описание переменной (для документации)
     let descriptionText = match[1]
-      .replace(/\*+/g, '') // Убираем звездочки `*`
-      .trim()
-      .split('.')[0] // Берём только текст до первой точки
-      .trim();
+        .replace(/\*+/g, '') // Убираем звездочки `*`
+        .trim()
+        .split('.')[0] // Берём только текст до первой точки
+        .trim();
 
-    descriptionText = wrapText(descriptionText, 40);
+    variableValue = wrapText(variableValue, 30);
+    descriptionText = wrapText(descriptionText, 35);
 
-    description += `| \`${variableName}\` | \`${variableValue}\` | <pre>${descriptionText}</pre>  |\n`;
+    // Форматируем описание переменной в таблице
+    description += `| \`${variableName}\` | <pre>${variableValue}</pre> | <pre>${descriptionText}</pre> |\n`;
   });
 
   description += `\n`;

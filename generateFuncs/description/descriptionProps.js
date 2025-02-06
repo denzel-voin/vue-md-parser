@@ -1,27 +1,44 @@
 export const descriptionProps = (description, scriptContent) => {
-  const propDocs = [...scriptContent.matchAll(/props:\s*{([\s\S]*?)}/g)];
 
-  if (propDocs.length === 0) return description; // Если нет пропсов, выходим
+  // Находим блок props с учётом вложенности {}
+  const propsStart = scriptContent.indexOf("props:");
+  if (propsStart === -1) return description; // Если нет props, выходим
 
+  let openBraces = 0;
+  let propsContent = "";
+  let foundOpening = false;
+
+  for (let i = propsStart; i < scriptContent.length; i++) {
+    const char = scriptContent[i];
+
+    if (char === "{") {
+      openBraces++;
+      foundOpening = true;
+    }
+    if (char === "}") openBraces--;
+
+    if (foundOpening) propsContent += char;
+
+    if (foundOpening && openBraces === 0) break; // Закрыли весь props
+  }
+
+  // Парсим пропсы
   description += `## Описание пропсов\n\n`;
   description += `| Пропс | Тип | Значение по умолчанию |\n`;
   description += `|-------|-----|-----------------------|\n`;
 
-  propDocs.forEach((match) => {
-    const propContent = match[1];
+  // Новая регулярка: поддерживает многострочные props и вложенность
+  const propMatches = [...propsContent.matchAll(
+      /(\w+)\s*:\s*{\s*type:\s*([\w]+)(?:[^}]*?default:\s*([^,}\n]+))?/g
+  )];
 
-    // Исправленное регулярное выражение для корректного извлечения пропсов
-    const propMatches = [...propContent.matchAll(/(\w+):\s*{[^}]*type:\s*['"]?(\w+)['"]?[^}]*default:\s*([^,}\n]+)/g)];
+  propMatches.forEach((propMatch) => {
+    const propName = propMatch[1];
+    const propType = propMatch[2];
+    const propDefaultValue = propMatch[3] ? propMatch[3].trim() : 'нет данных';
 
-    propMatches.forEach((propMatch) => {
-      const propName = propMatch[1]; // Имя пропса
-      const propType = propMatch[2]; // Тип пропса
-      const propDefaultValue = propMatch[3].trim(); // Значение по умолчанию
 
-      description += `| \`${propName}\` | \`${propType}\` | \`${propDefaultValue}\` |\n`;
-    });
-
-    description += `\n`;
+    description += `| \`${propName}\` | \`${propType}\` | \`${propDefaultValue}\` |\n`;
   });
 
   return description;

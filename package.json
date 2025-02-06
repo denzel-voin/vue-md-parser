@@ -14,7 +14,7 @@
     "url": "https://github.com/denzel-voin/vue-md-parser.git"
   },
   "keywords": ["vue", "parser", "markdown", "md"],
-  "author": "Ваше Имя",
+  "author": "Denzel",
   "license": "MIT",
   "dependencies": {
     "vitepress-plugin-mermaid": "^2.0.17"
