@@ -101,7 +101,7 @@ npx vitepress init
 
 #### Во время инициализации вам будет предложено выбрать конфигурацию:
 
-\`\`\`wbnet
+\`\`\`txt
 ┌  Welcome to VitePress!
 │
 ◇  Where should VitePress initialize the config?
