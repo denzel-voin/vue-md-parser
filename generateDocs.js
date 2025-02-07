@@ -5,6 +5,7 @@ import path from 'path';
 import {createGuides, findComponents, updateConfig} from "./generateFuncs/generateDocsForComponents.js";
 import {generateReadme} from "./generateFuncs/generateReadme.js";
 import {generateIndex} from "./generateFuncs/generateIndex.js";
+import {createTests} from "./generateFuncs/generateTests.js";
 
 const componentsDir = path.join(process.cwd(), 'src', 'front', 'src');
 const docsDir = path.join(process.cwd(), 'docs');
@@ -23,5 +24,6 @@ const sidebarItems = findComponents(componentsDir);
 updateConfig(sidebarItems);
 console.log('🎉 Генерация завершена!');
 createGuides();
+createTests();
 generateReadme(source, target);
 generateIndex(indexFile);
