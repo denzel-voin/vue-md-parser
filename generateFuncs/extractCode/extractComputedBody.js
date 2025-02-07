@@ -1,29 +1,29 @@
-// Функция для извлечения тела computed функции с использованием стека
-export function extractComputedBody(scriptContent, functionName) {
-  let body = '';
-  let startIndex = scriptContent.indexOf(functionName);
+export const extractComputedBody = (scriptContent, functionName) => {
+  // Ищем начало определения computed-свойства по имени функции
+  const regex = new RegExp(`const\\s+${functionName}\\s*=\\s*computed\\s*\\(\\s*\\(?[^)]*\\)?\\s*=>\\s*\\{`, 'm');
+  const match = regex.exec(scriptContent);
+  if (!match) return null;
 
-  if (startIndex === -1) {
-    return body;
+  // Начальная позиция – начало фигурной скобки тела computed
+  let startIndex = match.index + match[0].length - 1; // позиция открывающей фигурной скобки
+  let currentIndex = startIndex;
+  const stack = [];
+  let computedBody = '';
+
+  // Идем по символам начиная с открывающей скобки и ищем совпадение закрывающей
+  while (currentIndex < scriptContent.length) {
+    const char = scriptContent[currentIndex];
+    computedBody += char;
+    if (char === '{') {
+      stack.push(char);
+    } else if (char === '}') {
+      stack.pop();
+      // Если стек пуст, значит нашли завершающую фигурную скобку для текущего блока
+      if (stack.length === 0) {
+        break;
+      }
+    }
+    currentIndex++;
   }
-
-  // Обновляем регулярное выражение для поиска вычисляемой функции
-  const computedPattern = /computed\s*\(\s*(?:function\s*\(\s*)?([^)]*)\)\s*=>\s*\{[\s\S]*?\}/g;
-  const computedMatch = scriptContent.slice(startIndex).match(computedPattern);
-
-  if (!computedMatch) {
-    return body;
-  }
-
-  // Теперь извлекаем тело функции
-  let functionContent = computedMatch[0];
-
-  // Ищем начало и конец тела функции
-  let functionStartIndex = functionContent.indexOf('{') + 1;
-  let functionEndIndex = functionContent.lastIndexOf('}');
-
-  body = functionContent.slice(functionStartIndex, functionEndIndex).trim();
-
-  // Возвращаем корректный формат
-  return body ? `const ${functionName} = computed(() => {\n      ${body}\n});` : '';
-}
+  return `const ${functionName} = computed(() => ${computedBody.trim()}\n);`;
+};
