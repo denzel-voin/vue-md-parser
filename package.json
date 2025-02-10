@@ -1,6 +1,6 @@
 {
   "name": "vue-md-parser",
-  "version": "1.0.21",
+  "version": "1.0.24",
   "description": "Парсер для Vue, собирающий MD-файлы",
   "main": "index.js",
   "bin": {

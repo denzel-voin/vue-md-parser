@@ -46,51 +46,155 @@ export default withMermaid({
   `
 
     const testRunner = `
-  <template>
+<template>
   <div>
     <h2>Результаты тестов:</h2>
-    <pre>{{ results }}</pre>
-    <button class="test-button" @click="handleRunTests">
-      {{
-        results === 'Нажмите кнопку, чтобы запустить тесты.'
-          ? 'Запустить тесты'
-          : 'Перезапустить тесты'
-      }}
-    </button>
+
+    <!-- Общее состояние тестов -->
+    <div v-if="results.success" class="success">✅ Все тесты успешно пройдены!</div>
+    <div v-else-if="results.numFailedTestSuites > 0" class="error">
+      ❌ Ошибки в тестах: {{ results.numFailedTestSuites }} из {{ results.numTotalTestSuites }}
+    </div>
+    <div v-else class="warning">⚠️ Некоторые тесты не завершились корректно.</div>
+
+    <!-- Сообщения об ошибках -->
+    <pre v-if="errorMessage" class="error-log">{{ errorMessage }}</pre>
+
+    <!-- Сводная информация -->
+    <div v-if="results.testResults" class="summary">
+      <h3>Сводка по тестам:</h3>
+      <ul>
+        <li><strong>Общее количество тестов:</strong> {{ results.numTotalTests }}</li>
+        <li>
+          <strong>Пройдено:</strong> {{ results.numPassedTests }} ({{
+            getPercentage(results.numPassedTests, results.numTotalTests)
+          }}%)
+        </li>
+        <li>
+          <strong>Неудачных:</strong> {{ results.numFailedTests }} ({{
+            getPercentage(results.numFailedTests, results.numTotalTests)
+          }}%)
+        </li>
+      </ul>
+    </div>
+
+    <!-- Список успешных тестов -->
+    <div v-if="passedTests.length">
+      <h3>Успешные тесты:</h3>
+      <ul>
+        <li v-for="test in passedTests" :key="test.fullName">
+          <strong>{{ test.fullName }}</strong> ✅ ({{ test.duration }} мс)
+        </li>
+      </ul>
+    </div>
+
+    <!-- Список неудачных тестов -->
+    <div v-if="failedTests.length">
+      <h3>Неудачные тесты:</h3>
+      <ul>
+        <li v-for="test in failedTests" :key="test.fullName">
+          <strong>{{ test.fullName }}</strong> ❌ ({{ test.duration }} мс)
+          <pre v-if="test.failureMessages.length" class="error-log">
+            {{ test.failureMessages.join('\\n') }}
+          </pre>
+        </li>
+      </ul>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { runTests } from '../../../../tests/sampleTests.js';
+import { ref, onMounted, computed, watch } from 'vue';
 
-const results = ref('Нажмите кнопку, чтобы запустить тесты.');
+const results = ref({});
+const errorMessage = ref('');
 
-const handleRunTests = async () => {
-  results.value = 'Запускаются тесты...';
-  try {
-    const testResults = await runTests();
-    results.value = testResults;
-  } catch (error) {
-    results.value = \`Ошибка при запуске тестов: \${error.message}\`;
-  }
+// Функция для вычисления процента успешных/неудачных тестов
+const getPercentage = (num, total) => {
+  return ((num / total) * 100).toFixed(2);
 };
+
+// Загружаем результаты тестов при монтировании компонента
+onMounted(async () => {
+  try {
+    const response = await fetch('/test-results.json');
+    const data = await response.json();
+    results.value = data;
+
+    // Если есть ошибки, собираем все сообщения об ошибках
+    if (!data.success) {
+      errorMessage.value = data.testResults
+        .map((t) => (t.failureMessages ? t.failureMessages.join('\\n') : ''))
+        .join('\\n\\n');
+    }
+  } catch (error) {}
+});
+
+// Вычисляем успешные и неудачные тесты
+const passedTests = computed(() => {
+  const assertionResults = results.value?.testResults?.[0]?.assertionResults;
+  return (
+    assertionResults
+      ?.filter((test) => test.status === 'passed')
+      .map((test) => ({
+        ...test,
+        failureMessages: test.failureMessages || [],
+      })) || []
+  );
+});
+
+const failedTests = computed(() => {
+  const assertionResults = results.value?.testResults?.[0]?.assertionResults;
+  return (
+    assertionResults
+      ?.filter((test) => test.status === 'failed')
+      .map((test) => ({
+        ...test,
+        failureMessages: test.failureMessages || [],
+      })) || []
+  );
+});
 </script>
 
 <style scoped>
-.test-button {
-  background-color: #9900ff;
-  border: none;
-  color: white;
-  padding: 10px 20px;
-  font-size: 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
+.success {
+  color: green;
+  font-weight: bold;
 }
 
-.test-button:hover {
-  background-color: #9b1cef;
+.error {
+  color: red;
+  font-weight: bold;
+}
+
+.warning {
+  color: orange;
+  font-weight: bold;
+}
+
+.passed {
+  color: green;
+}
+
+.failed {
+  color: red;
+}
+
+.error-log {
+  background: rgba(255, 221, 221, 0.1);
+  border-left: 4px solid red;
+  padding: 5px;
+  white-space: pre-wrap;
+  font-family: monospace;
+}
+
+.summary {
+  margin-bottom: 20px;
+}
+
+.duration {
+  color: #555;
+  font-style: italic;
 }
 </style>
 `;
