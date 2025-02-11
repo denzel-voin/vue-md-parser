@@ -55,10 +55,6 @@ export default withMermaid({
     <div v-else-if="results.numFailedTestSuites > 0" class="error">
       ❌ Ошибки в тестах: {{ results.numFailedTestSuites }} из {{ results.numTotalTestSuites }}
     </div>
-    <div v-else class="warning">⚠️ Некоторые тесты не завершились корректно.</div>
-
-    <!-- Сообщения об ошибках -->
-    <pre v-if="errorMessage" class="error-log">{{ errorMessage }}</pre>
 
     <!-- Сводная информация -->
     <div v-if="results.testResults" class="summary">
@@ -92,10 +88,16 @@ export default withMermaid({
     <div v-if="failedTests.length">
       <h3>Неудачные тесты:</h3>
       <ul>
-        <li v-for="test in failedTests" :key="test.fullName">
+        <li v-for="(test, index) in failedTests" :key="test.fullName">
           <strong>{{ test.fullName }}</strong> ❌ ({{ test.duration }} мс)
           <pre v-if="test.failureMessages.length" class="error-log">
-            {{ test.failureMessages.join('\\n') }}
+            <button @click="toggleError(index)" class="error-toggle-btn">
+              {{ isErrorVisible(index) ? 'Скрыть ошибки' : 'Показать ошибки' }}
+            </button>
+            <div v-if="isErrorVisible(index)">
+              <strong>Ожидалось:</strong> {{ extractTestValue(test.failureMessages, 'Expected') }}
+              <strong>Получено:</strong> {{ extractTestValue(test.failureMessages, 'Received') }}
+            </div>
           </pre>
         </li>
       </ul>
@@ -104,56 +106,82 @@ export default withMermaid({
 </template>
 
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 
 const results = ref({});
 const errorMessage = ref('');
+const errorVisibility = ref({});
 
-// Функция для вычисления процента успешных/неудачных тестов
+const toggleError = (index) => {
+  errorVisibility.value[index] = !errorVisibility.value[index];
+};
+
+const isErrorVisible = (index) => {
+  return !!errorVisibility.value[index];
+};
+
 const getPercentage = (num, total) => {
   return ((num / total) * 100).toFixed(2);
 };
 
-// Загружаем результаты тестов при монтировании компонента
 onMounted(async () => {
   try {
     const response = await fetch('/test-results.json');
     const data = await response.json();
     results.value = data;
 
-    // Если есть ошибки, собираем все сообщения об ошибках
     if (!data.success) {
       errorMessage.value = data.testResults
         .map((t) => (t.failureMessages ? t.failureMessages.join('\\n') : ''))
         .join('\\n\\n');
     }
-  } catch (error) {}
+  } catch (error) {
+    errorMessage.value = 'Ошибка загрузки данных';
+  }
 });
 
-// Вычисляем успешные и неудачные тесты
 const passedTests = computed(() => {
-  const assertionResults = results.value?.testResults?.[0]?.assertionResults;
   return (
-    assertionResults
-      ?.filter((test) => test.status === 'passed')
-      .map((test) => ({
-        ...test,
-        failureMessages: test.failureMessages || [],
-      })) || []
+    results.value?.testResults?.flatMap((testSuite) =>
+      testSuite.assertionResults
+        ?.filter((test) => test.status === 'passed')
+        .map((test) => ({
+          ...test,
+          failureMessages: test.failureMessages || [],
+        })),
+    ) || []
   );
 });
 
 const failedTests = computed(() => {
-  const assertionResults = results.value?.testResults?.[0]?.assertionResults;
   return (
-    assertionResults
-      ?.filter((test) => test.status === 'failed')
-      .map((test) => ({
-        ...test,
-        failureMessages: test.failureMessages || [],
-      })) || []
+    results.value?.testResults?.flatMap((testSuite) =>
+      testSuite.assertionResults
+        ?.filter((test) => test.status === 'failed')
+        .map((test) => ({
+          ...test,
+          failureMessages: test.failureMessages || [],
+        })),
+    ) || []
   );
 });
+
+// Универсальная функция для извлечения данных из сообщений
+const extractTestValue = (messages, type) => {
+  const failureMessage = messages.find((msg) => msg.includes(type + ':'));
+  if (failureMessage) {
+    const match = failureMessage.match(new RegExp(\`${type}: (.*)\`));
+    if (match) {
+      return cleanTestMessage(match[1]);
+    }
+  }
+  return 'Не указано';
+};
+
+// Очистка от лишних данных и ANSI кодов
+const cleanTestMessage = (message) => {
+  return message.replace(/\x1b\\[[0-9;]*m/g, '').trim();
+};
 </script>
 
 <style scoped>
@@ -172,14 +200,6 @@ const failedTests = computed(() => {
   font-weight: bold;
 }
 
-.passed {
-  color: green;
-}
-
-.failed {
-  color: red;
-}
-
 .error-log {
   background: rgba(255, 221, 221, 0.1);
   border-left: 4px solid red;
@@ -192,9 +212,17 @@ const failedTests = computed(() => {
   margin-bottom: 20px;
 }
 
-.duration {
-  color: #555;
-  font-style: italic;
+.error-toggle-btn {
+  background-color: #ff6347;
+  color: white;
+  border: none;
+  padding: 5px;
+  cursor: pointer;
+  margin-bottom: 5px;
+}
+
+.error-toggle-btn:hover {
+  background-color: #ff4500;
 }
 </style>
 `;
