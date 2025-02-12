@@ -1,5 +1,6 @@
 import path from 'path';
 import fs from 'fs';
+import {createTestFile} from "./generateInitTest.js";
 
 const docsDir = path.join(process.cwd(), 'docs');
 const themeDir = path.join(process.cwd(), 'docs', '.vitepress', 'theme');
@@ -61,4 +62,5 @@ export default withMermaid({
     fs.writeFileSync(path.join(componentsDir, 'TestRunner.vue'), testRunner);
 
     console.log('📘 Файлы install.md и usage.md созданы в папке guides.');
+    createTestFile();
 }

@@ -39,8 +39,8 @@ features:
   - title: Правила коммитов
     details: Подробная инструкция по наименованию коммитов
     link: /guides/commits
-  - title: Тестирование проекта
-    details: Запуск автотестов
+  - title: Тестирование
+    details: Покрытие проекта тестами
     link: /tests
 ---
 
