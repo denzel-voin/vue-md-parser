@@ -17,6 +17,8 @@ export function createTestFile() {
 
         // Пример содержимого файла App.test.js
         const fileContent = `
+import App from '../App';
+
 describe('App.vue', () => {
   it('должен всегда проходить', () => {
     expect(true).toBe(true);

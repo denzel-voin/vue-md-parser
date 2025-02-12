@@ -64,7 +64,7 @@ export function generateDocFile(filePath, name, relativePath) {
 
 // Функция обновления config.mjs
 export function updateConfig(items) {
-  const configTemplate = `import { withMermaid } from 'vitepress-plugin-mermaid';\n\nexport default withMermaid({\n  themeConfig: {\n    search: {\n      provider: 'local'\n    },\n    sidebar: [\n      {\n        text: 'Структура',\n        collapsed: false,\n        items: ${JSON.stringify(items, null, 2)}\n      },\n      {\n        text: 'Гайды',\n        collapsed: true,\n        items: [\n          { text: 'Как установить', link: '/guides/install' },\n          { text: 'Как использовать', link: '/guides/usage' },\n          { text: 'Правила комитов', link: '/guides/commits' }\n        ]\n      }\n    ]\n  },\nmermaid: {
+  const configTemplate = `import { withMermaid } from 'vitepress-plugin-mermaid';\n\nexport default withMermaid({\n  themeConfig: {\n    search: {\n      provider: 'local'\n    },\n    sidebar: [\n      {\n        text: 'Структура',\n        collapsed: false,\n        items: ${JSON.stringify(items, null, 2)}\n      },\n      {\n        text: 'Гайды',\n        collapsed: true,\n        items: [\n          { text: 'Как установить', link: '/guides/install' },\n          { text: 'Как использовать', link: '/guides/usage' },\n          { text: 'Правила комитов', link: '/guides/commits' }\n,\n          { text: 'Тесты', link: '/tests' },\n           ]\n      }\n    ]\n  },\nmermaid: {
     // refer https://mermaid.js.org/config/setup/modules/mermaidAPI.html#mermaidapi-configuration-defaults for options
   },
   // optionally set additional config for plugin itself with MermaidPluginConfig
