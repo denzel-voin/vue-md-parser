@@ -3,7 +3,7 @@ import fs from 'fs';
 
 export function createTestFile() {
     // Задаём путь к директории, которую нужно создать (src/fron/src/тест)
-    const testFolderPath = path.join(process.cwd(), 'src', 'front', 'src', 'tests');
+    const testFolderPath = path.resolve(process.cwd(), '../src', 'front', 'src', 'tests');
     // Задаём полный путь к файлу, который нужно создать (App.test.js внутри папки тест)
     const testFilePath = path.join(testFolderPath, 'App.test.js');
 
@@ -17,14 +17,14 @@ export function createTestFile() {
 
         // Пример содержимого файла App.test.js
         const fileContent = `
-import App from '@/App.vue';
-
-describe('App.vue', () => {
-  it('должен всегда проходить', () => {
-    expect(true).toBe(true);
-  });
-});
-`;
+        import App from '@/App.vue';
+        
+        describe('App.vue', () => {
+          it('должен всегда проходить', () => {
+            expect(true).toBe(true);
+          });
+        });
+        `;
 
         // Создаём (или перезаписываем) файл App.test.js
         fs.writeFile(testFilePath, fileContent, (err) => {
