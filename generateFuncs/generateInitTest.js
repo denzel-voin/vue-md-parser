@@ -17,7 +17,7 @@ export function createTestFile() {
 
         // Пример содержимого файла App.test.js
         const fileContent = `
-import App from '../App';
+import App from '@/App.vue';
 
 describe('App.vue', () => {
   it('должен всегда проходить', () => {

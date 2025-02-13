@@ -7,7 +7,7 @@ import {generateReadme} from "./generateFuncs/generateReadme.js";
 import {generateIndex} from "./generateFuncs/generateIndex.js";
 import {createTests} from "./generateFuncs/generateTests.js";
 
-const componentsDir = path.join(process.cwd(), 'src', 'front', 'src');
+const componentsDir = path.resolve(process.cwd(), '../src', 'front', 'src');
 const docsDir = path.join(process.cwd(), 'docs');
 const source = path.resolve(process.cwd(), 'README.md');
 const target = path.resolve(process.cwd(), 'docs/README.md');
